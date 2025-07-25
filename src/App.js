@@ -51,8 +51,17 @@ function TodoApp() {
     name: '',
     description: '',
     deadline: '',
-    status: 'Not Started'
+    status: 'Not Started',
+    dependencies: []
   });
+
+  const toggleTaskCompleted = (taskId) => {
+    setTasks({
+      ...tasks, [selectedList]: tasks[selectedList].map(task =>
+        task.id === taskId ? { ...task, status: task.status === 'Completed' ? 'Not Started' : 'Completed' } : task
+      )
+    });
+  };
 
   const deleteList = (id) => {
     setLists(lists.filter(list => list.id !== id));
@@ -85,7 +94,8 @@ function TodoApp() {
       name: '',
       description: '',
       deadline: '',
-      status: 'Not Started'
+      status: 'Not Started',
+      dependencies: []
     });
   };
   const handleInputChange = (field, value) => {
@@ -96,6 +106,10 @@ function TodoApp() {
   };
   const saveTask = () => {
     if (!formData.name.trim()) return;
+    if (!selectedList || !tasks[selectedList]) {
+      alert("please select a list");
+      return;
+    }
 
     const newTask = {
       id: Date.now(),
@@ -103,7 +117,8 @@ function TodoApp() {
       description: formData.description,
       deadline: formData.deadline,
       status: formData.status,
-      createDate: new Date().toISOString().split('T')[0]
+      createDate: new Date().toISOString().split('T')[0],
+      dependencies: formData.dependencies || []
     };
 
     setTasks({
@@ -115,14 +130,15 @@ function TodoApp() {
   };
   const filterTasks = (taskList) => {
     let filtered = taskList;
-    if (filters.status !== 'Any') {
-      filtered = filtered.filter(task => task.status === filters.status);
-    }
     if (filters.name) {
       filtered = filtered.filter(task =>
         task.name.toLowerCase().includes(filters.name.toLowerCase())
       );
     }
+    if (filters.status !== 'Any') {
+      filtered = filtered.filter(task => task.status === filters.status);
+    }
+
     if (filters.expired) {
       const today = new Date().toISOString().split('T')[0];
       filtered = filtered.filter(task => task.deadline < today);
@@ -130,12 +146,12 @@ function TodoApp() {
 
     filtered.sort((a, b) => {
       switch (filters.orderBy) {
+        case 'Name':
+          return a.name.localeCompare(b.name);
         case 'Create Date':
           return new Date(a.createDate) - new Date(b.createDate);
         case 'Deadline':
           return new Date(a.deadline) - new Date(b.deadline);
-        case 'Name':
-          return a.name.localeCompare(b.name);
         case 'Status':
           return a.status.localeCompare(b.status);
         default:
@@ -144,7 +160,7 @@ function TodoApp() {
     });
     return filtered;
   };
-  
+
   const handleFilterChange = (key, value) => {
     setFilters({
       ...filters,
@@ -158,6 +174,11 @@ function TodoApp() {
     });
   };
   const selectedListName = lists.find(list => list.id === selectedList)?.name || 'To-Do List';
+
+  const isDependencyCompleted = (task) => {
+    if (!task.dependencies || task.dependencies.length === 0) return true;
+    return task.dependencies.every(depId => tasks[selectedList].find(t => t.id === depId && t.status === 'Completed'));
+  };
 
   return (
     <div className="todo-container">
@@ -242,7 +263,7 @@ function TodoApp() {
                 <div>
                   <label className="filters-label">Order by</label>
                   <div className="filters-group">
-                    {['Create Date', 'Deadline', 'Name', 'Status'].map(option => (
+                    {['Name', 'Create Date', 'Deadline', 'Status'].map(option => (
                       <label key={option} className="filters-group-label">
                         <input
                           type="radio"
@@ -269,44 +290,44 @@ function TodoApp() {
               className="search-input"
             />
           </div>
-          <div className="tasks-container">
-            {tasks[selectedList] && filterTasks(tasks[selectedList])
-              .filter(task => task.name.toLowerCase().includes(searchText.toLowerCase()))
-              .map(task => {
-                const isExpired = task.deadline < new Date().toISOString().split('T')[0];
-                return (
-                  <div
-                    key={task.id}
-                    className={`task-item ${isExpired ? 'expired' : ''}`}
-                  >
-                    <div className="task-content">
-                      <div className="task-info">
-                        <h3 className={`task-name ${isExpired ? 'expired' : ''}`}>{task.name}</h3>
-                        {task.description && (
-                          <p className="task-description">{task.description}</p>
-                        )}
-                        <div className='task-details'>
-                          <div className="task-deadline">
-                            Deadline: {task.deadline} {isExpired && <span className="expired">(Expired)</span>}
-                          </div>
-                          <div>
-                            <span className={`task-status ${task.status === 'Completed' ? "" : task.status === 'In Progress'}`}>
-                              Status: {task.status}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => deleteTask(task.id)}
-                        className="task-delete-button"
-                      >
+          <table className="task-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Deadline</th>
+                <th>Status</th>
+                <th>Done</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {tasks[selectedList] && filterTasks(tasks[selectedList])
+                .filter(task => task.name.toLowerCase().includes(searchText.toLowerCase()))
+                .map(task => (
+                  <tr key={task.id}>
+                    <td>{task.name}</td>
+                    <td>{task.description}</td>
+                    <td>{task.deadline}</td>
+                    <td>{task.status}</td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={task.status === "Completed"}
+                        onChange={() => toggleTaskCompleted(task.id)}
+                        disabled={!isDependencyCompleted(task, tasks[selectedList]) ? "Dependencies not completed" : ""}
+                      />
+                    </td>
+                    <td>
+                      <button onClick={() => deleteTask(task.id)} className="task-delete-button">
                         x
                       </button>
-                    </div>
-                  </div>
-                );
-              })}
-          </div>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+
           <button
             onClick={openModal}
             className="add-task-button"
@@ -369,6 +390,33 @@ function TodoApp() {
                       <option value="In Progress">In Progress</option>
                       <option value="Completed">Completed</option>
                     </select>
+                  </div>
+                  <div>
+                    <label className="modal-label">Dependencies</label>
+                    {tasks[selectedList]?.map(task => (
+                      <label key={task.id} className="modal-checkbox">
+                        <input
+                          type="checkbox"
+                          value={task.id}
+                          checked={formData.dependencies.includes(task.id)}
+                          onChange={() => {
+                            const dependencies = formData.dependencies || [];
+                            if (dependencies.includes(task.id)) {
+                              setFormData({
+                                ...formData,
+                                dependencies: dependencies.filter(id => id !== task.id)
+                              });
+                            } else {
+                              setFormData({
+                                ...formData,
+                                dependencies: [...dependencies, task.id]
+                              });
+                            }
+                          }}
+                        ></input>
+                        {task.name}
+                      </label>
+                    ))}
                   </div>
                 </div>
               </div>

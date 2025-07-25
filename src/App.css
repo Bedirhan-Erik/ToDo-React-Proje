@@ -218,100 +218,16 @@
   background: #ffffff;
 }
 
-.tasks-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.task-item {
-  background: #fff;
-  border: 1.5px solid #ebebeb;
-  border-radius: 12px;
-  padding: 18px 22px 18px 22px;
-  margin-bottom: 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  position: static;
-}
-.task-item.expired {
-  border-color: #fae0e0;
-  background: #fff6f6;
-}
-.task-name {
-  font-weight: 600;
-  font-size: 17px;
-  margin-bottom: 6px;
-  color: #21242a;
-}
-.task-name.expired {
-  color: #e84545;
-}
-.task-status {
-  display: inline-block;
-  padding: 5px 16px;
-  border-radius: 7px;
-  font-size: 14px;
-  margin-top: 7px;
-}
-.task-status.Completed {
-  background: #d5f3e3;
-  color: #267f42;
-}
-
-.task-status.Expired {
-  background: #fae0e0;
-  color: #e84545;
-}
-
-.task-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  width: 100%;
-}
-.task-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.task-description {
-  color: #000000;
-  font-size: medium;
-  margin-bottom: 10px;
-}
-
-.task-details {
-  font-size: 1rem;
-  color: #000000;
-  margin-top: 10px;
-}
-
-.task-deadline {
-  color: #000000;
-  font-size: medium;
-  margin-bottom: 10px;
-}
-
-.task-status {
-  color: #000000;
-  font-size: medium;
-  margin-bottom: 10px;
-}
-
 .task-delete-button {
   position: relative;
-  top: 10px;
-  right: 10px;
   background: none;
   border: none;
-  cursor: pointer;
+  vertical-align: middle;
+  font-size: larger;
 }
 
 .task-delete-button:hover {
-  color: #ffffff;
+  color: #fb0000;
 }
 
 .add-task-button {
@@ -358,7 +274,7 @@
 
 .modal-header h3 {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 500;
   color: #000000;
 }
 
@@ -431,4 +347,36 @@
 
 .modal-add-button:hover {
   background: #e4edff;
+}
+
+.task-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.task-table th, .task-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+.task-table th {
+  background: #f6f7fb;
+  font-weight: bold;
+}
+.task-table tr:last-child td {
+  border-bottom: none;
+}
+.task-table tr:hover {
+  background: #f5f8fa;
+}
+
+.task-table input[type="checkbox"] {
+  accent-color: #000000;
+}
+
+.modal-checkbox {
+  margin-right: 10px;
+  accent-color: #000000;
 }
