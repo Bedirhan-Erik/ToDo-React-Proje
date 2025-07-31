@@ -1,10 +1,62 @@
+import React from 'react';
 
-function MainContent({ selectedList, Lists, tasks, setTasks, filters,searchText,
-  setSearchText, showFilters, setShowFilters, setShowModal}) {
+interface Task {
+  id: string
+  name: string
+  description: string
+  deadline: string
+  status: string
+  createDate: string
+  dependencies?: string[]
+}
 
-  const selectedListName = Lists.find(l => l.id === selectedList)?.name || "To-Do List";
+interface List {
+  id: string
+  name: string
+}
 
-  const toggleTaskCompleted = (taskId) => {
+interface Filters {
+  name: string
+  status: string
+  expired: boolean
+  orderBy: string
+}
+
+interface Post{
+  id:string
+  [key:string]: any
+}
+
+interface MainContentProps {
+  selectedList: string
+  Lists: List[]
+  tasks: Record<string, Task[]>
+  setTasks: React.Dispatch<React.SetStateAction<Record<string, Task[]>>>
+  filters: Filters
+  searchText: string
+  setSearchText: React.Dispatch<React.SetStateAction<string>>
+  showFilters: boolean
+  setShowFilters: React.Dispatch<React.SetStateAction<boolean>>
+  setShowModal: React.Dispatch<React.SetStateAction<boolean>>
+  posts:Post[]
+}
+
+function MainContent({ 
+  selectedList, 
+  Lists, 
+  tasks, 
+  setTasks, 
+  filters, 
+  searchText,
+  setSearchText, 
+  showFilters, 
+  setShowFilters, 
+  setShowModal, 
+}: MainContentProps) {
+
+  const selectedListName: string = Lists.find(l => l.id === selectedList)?.name || "To-Do List"
+
+  const toggleTaskCompleted = (taskId: string): void => {
     setTasks({
       ...tasks,
       [selectedList]: tasks[selectedList].map(task =>
@@ -13,35 +65,35 @@ function MainContent({ selectedList, Lists, tasks, setTasks, filters,searchText,
     });
   };
 
-  const deleteTask = (taskId) => {
+  const deleteTask = (taskId: string): void => {
     setTasks({
       ...tasks,
       [selectedList]: tasks[selectedList].filter(task => task.id !== taskId)
     });
   };
 
-  const filterTasks = (taskList) => {
-    let filtered = taskList;
+  const filterTasks = (taskList: Task[]): Task[] => {
+    let filtered: Task[] = taskList;
     if (filters.name) {
       filtered = filtered.filter(task =>
         task.name.toLowerCase().includes(filters.name.toLowerCase())
       );
     }
     if (filters.status !== 'Any') {
-      filtered = filtered.filter(task => task.status === filters.status);
+      filtered = filtered.filter(task => task.status === filters.status)
     }
     if (filters.expired) {
-      const today = new Date().toISOString().split('T')[0];
-      filtered = filtered.filter(task => task.deadline < today);
+      const today: string = new Date().toISOString().split('T')[0]
+      filtered = filtered.filter(task => task.deadline < today)
     }
-    filtered.sort((a, b) => {
+    filtered.sort((a: Task, b: Task): number => {
       switch (filters.orderBy) {
         case 'Name':
-          return a.name.localeCompare(b.name);
+          return a.name.localeCompare(b.name)
         case 'Create Date':
-          return new Date(a.createDate).getTime() - new Date(b.createDate).getTime();
+          return new Date(a.createDate).getTime() - new Date(b.createDate).getTime()
         case 'Deadline':
-          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
         case 'Status':
           return a.status.localeCompare(b.status);
         default:
@@ -51,9 +103,11 @@ function MainContent({ selectedList, Lists, tasks, setTasks, filters,searchText,
     return filtered;
   };
 
-  const isDependencyCompleted = (task, taskList) => {
+  const isDependencyCompleted = (task: Task, taskList: Task[]): boolean => {
     if (!task.dependencies || task.dependencies.length === 0) return true;
-    return task.dependencies.every(depId => taskList.find(t => t.id === depId && t.status === 'Completed'));
+    return task.dependencies.every((depId: string) => 
+      taskList.find(t => t.id === depId && t.status === 'Completed')
+    );
   };
 
   return (
@@ -73,11 +127,10 @@ function MainContent({ selectedList, Lists, tasks, setTasks, filters,searchText,
             type="text"
             placeholder="search tasks..."
             value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
             className="w-[95%] px-5 py-2 border border-gray-300 rounded-xl bg-white shadow text-base focus:border-black"
           />
         </div>
-
         <div className="w-full flex justify-center">
           <table className="w-full min-w-[700px] border-collapse rounded-xl">
             <thead>
@@ -92,8 +145,8 @@ function MainContent({ selectedList, Lists, tasks, setTasks, filters,searchText,
             </thead>
             <tbody>
               {tasks[selectedList] && filterTasks(tasks[selectedList])
-                .filter(task => task.name.toLowerCase().includes(searchText.toLowerCase()))
-                .map(task => (
+                .filter((task: Task) => task.name.toLowerCase().includes(searchText.toLowerCase()))
+                .map((task: Task) => (
                   <tr key={task.id}>
                     <td className='p-4'>{task.name}</td>
                     <td className='p-4'>{task.description}</td>
@@ -109,7 +162,10 @@ function MainContent({ selectedList, Lists, tasks, setTasks, filters,searchText,
                       />
                     </td>
                     <td className='p-4'>
-                      <button onClick={() => deleteTask(task.id)} className="text-lg hover:text-red-700 text-black">
+                      <button 
+                        onClick={() => deleteTask(task.id)} 
+                        className="text-lg hover:text-red-700 text-black"
+                      >
                         x
                       </button>
                     </td>
@@ -127,9 +183,7 @@ function MainContent({ selectedList, Lists, tasks, setTasks, filters,searchText,
           </button>
         </div>
       </div>
-
     </div>
-
   );
 }
 

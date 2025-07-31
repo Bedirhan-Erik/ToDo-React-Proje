@@ -1,31 +1,64 @@
-import { useState } from "react";
+import React from "react"
 
-function AddTask({ formData, setFormData, tasks, setTasks, selectedList, setShowModal }) {
-  const [error, setError] = useState('');
+interface Task {
+  id: number;
+  name: string;
+  description: string;
+  deadline: string;
+  status: string;
+  createDate: string;
+  dependencies: number[];
+}
 
-  const handleInputChange = (field, value) => {
-    setFormData({
-      ...formData,
-      [field]: value
-    });
+interface FormData {
+  name: string;
+  description: string;
+  deadline: string;
+  status: string;
+  dependencies: number[];
+}
+
+interface AddTaskProps {
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  tasks: Record<number, Task[]>;
+  setTasks: React.Dispatch<React.SetStateAction<Record<number, Task[]>>>;
+  selectedList: number;
+  setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const AddTask: React.FC<AddTaskProps> = ({
+  formData,
+  setFormData,
+  tasks,
+  setTasks,
+  selectedList,
+  setShowModal,
+}) => {
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault(); 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    if (!formData.name || !formData.description || !formData.deadline) {
-      setError("All fields are required.");
-      return;
-    }
+    if (!formData.name || !formData.description || !formData.deadline) return null;
 
-    const newTask = {
+    const newTask: Task = {
       id: Date.now(),
       name: formData.name,
       description: formData.description,
       deadline: formData.deadline,
       status: formData.status,
-      createDate: new Date().toISOString().split('T')[0],
-      dependencies: formData.dependencies || []
+      createDate: new Date().toISOString().split("T")[0],
+      dependencies: formData.dependencies || [],
     };
 
     setTasks({
@@ -33,9 +66,14 @@ function AddTask({ formData, setFormData, tasks, setTasks, selectedList, setShow
       [selectedList]: [...(tasks[selectedList] || []), newTask],
     });
 
-    setFormData({ name: '', description: '', deadline: '', status: 'Not Started', dependencies: [] });
+    setFormData({
+      name: "",
+      description: "",
+      deadline: "",
+      status: "Not Started",
+      dependencies: [],
+    });
     setShowModal(false);
-    setError('');
   };
 
   return (
@@ -44,32 +82,36 @@ function AddTask({ formData, setFormData, tasks, setTasks, selectedList, setShow
         <h2 className="text-xl font-semibold mb-4">Add New Task</h2>
 
         <input
+          name="name"
           type="text"
           placeholder="Task name"
-          value={formData.name}
-          onChange={(e) => handleInputChange("name", e.target.value)}
+          value={formData?.name || ""}
+          onChange={handleChange}
           className="w-full mb-3 px-4 py-2 border border-gray-300 rounded-xl"
         />
 
         <textarea
+          name="description"
           placeholder="Description"
-          value={formData.description}
-          onChange={(e) => handleInputChange("description", e.target.value)}
+          value={formData?.description || ""}
+          onChange={handleChange}
           className="w-full mb-3 px-4 py-2 border border-gray-300 rounded-xl"
         />
 
         <input
+          name="deadline"
           type="date"
-          value={formData.deadline}
-          onChange={(e) => handleInputChange("deadline", e.target.value)}
+          value={formData?.deadline || ""}
+          onChange={handleChange}
           className="w-full mb-3 px-4 py-2 border border-gray-300 rounded-xl"
         />
 
         <div className="mb-3">
           <label className="block font-medium mb-2">Status</label>
           <select
-            value={formData.status}
-            onChange={(e) => handleInputChange("status", e.target.value)}
+            name="status"
+            value={formData?.status}
+            onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
           >
             <option value="Not Started">Not Started</option>
@@ -80,7 +122,7 @@ function AddTask({ formData, setFormData, tasks, setTasks, selectedList, setShow
 
         <div className="mb-3">
           <label className="block font-medium mb-2">Dependencies</label>
-          {tasks[selectedList]?.map(task => (
+          {tasks[selectedList]?.map((task) => (
             <label key={task.id} className="block">
               <input
                 type="checkbox"
@@ -91,12 +133,12 @@ function AddTask({ formData, setFormData, tasks, setTasks, selectedList, setShow
                   if (dependencies.includes(task.id)) {
                     setFormData({
                       ...formData,
-                      dependencies: dependencies.filter(id => id !== task.id)
+                      dependencies: dependencies.filter((id) => id !== task.id),
                     });
                   } else {
                     setFormData({
                       ...formData,
-                      dependencies: [...dependencies, task.id]
+                      dependencies: [...dependencies, task.id],
                     });
                   }
                 }}
@@ -107,8 +149,6 @@ function AddTask({ formData, setFormData, tasks, setTasks, selectedList, setShow
           ))}
         </div>
 
-        {error && <p className="text-red-600 mb-2">{error}</p>}
-
         <div className="flex justify-end gap-2">
           <button
             type="button"
@@ -117,16 +157,13 @@ function AddTask({ formData, setFormData, tasks, setTasks, selectedList, setShow
           >
             Cancel
           </button>
-          <button
-            type="submit"
-            className="px-4 py-2 rounded bg-black text-white hover:bg-gray-800"
-          >
+          <button type="submit" className="px-4 py-2 rounded bg-black text-white hover:bg-gray-800">
             Add Task
           </button>
         </div>
       </form>
     </div>
   );
-}
+};
 
 export default AddTask;
