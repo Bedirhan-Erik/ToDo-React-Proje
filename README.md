@@ -2,8 +2,8 @@
 
 To-Do List Frontend
 
-Kullandığım Teknolojiler: React , TypeScript , Tailwind CSS , Fake API Server , Unıt Test
-Veri yönetimi ve test: useState , Fake Server , Unit Test 
+Kullandığım Teknolojiler: React , TypeScript , Tailwind CSS , Fake API Server
+Veri yönetimi: useState, useEffect , Fake Server(JSON server) ,
 
 ## React kullanarak tek sayfa halinde bir yapılacaklar listesi uygulaması yaptım. Verileri React içinde statik olarak saklıyorum.
 
@@ -41,4 +41,5 @@ Eklediğim Özellikler
   Duruma göre
 
 Yapılacak maddesinin silinmesi 
+
 
